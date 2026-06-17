@@ -98,41 +98,8 @@ public class PlayerController : NetworkBehaviour
             _characterController.Move(move * _speed * Time.deltaTime);
 
 
-            
-            Collider[] objetosCercanos = Physics.OverlapSphere(transform.position, 4.0f);
-
-            foreach (Collider col in objetosCercanos) 
-            {
-                
-                if (col.TryGetComponent<ItemPickup>(out ItemPickup item))
-                {
-                    PlayerScore miScore = GetComponent<PlayerScore>();
-                    if (miScore != null && item.NetworkObject != null)
-                    {
-                        
-                        PedirSvrAgarrarItemServerRpc(item.NetworkObject.NetworkObjectId); 
-                    }
-                }
+          
+           
             }
         }
     }
-
-    
-    [Rpc(SendTo.Server)]
-    private void PedirSvrAgarrarItemServerRpc(ulong itemNetworkId)
-    {
-        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(itemNetworkId, out NetworkObject netObj))
-        {
-            if (netObj != null)
-            {
-                ItemPickup item = netObj.GetComponent<ItemPickup>();
-                PlayerScore playerScore = GetComponent<PlayerScore>();
-
-                if (item != null && playerScore != null)
-                {
-                    item.RecolectarItem(playerScore);
-                }
-            }
-        }
-    }
-}

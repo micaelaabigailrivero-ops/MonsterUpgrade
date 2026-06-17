@@ -5,14 +5,14 @@ using UnityEngine;
 public class PlayerScore : NetworkBehaviour
 
 {
-    // Variables de red: Servidor escribe, TODOS leen
+  
     public NetworkVariable<int> puntosEnMano = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     public NetworkVariable<int> puntosBanco = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
-    // UI Local (Solo para el dueño)
+   
     private TextMeshProUGUI textoMiUI;
 
-    // UI Global (Para la tabla de posiciones de todos)
+    
     private TextMeshProUGUI textoLeaderboard;
 
     public override void OnNetworkSpawn()
@@ -60,11 +60,11 @@ public class PlayerScore : NetworkBehaviour
         }
     }
 
-    // ==========================================================
-    // NUEVOS PUENTES DE RED: Para que el cliente pueda sumar puntos
-    // ==========================================================
+    
+    
+    
 
-    // Llama a esto desde tus monedas/triggers cuando un jugador deba sumar puntos en mano
+    
     public void SolicitarAgregarPuntos(int cantidad)
     {
         if (IsServer)
@@ -90,9 +90,7 @@ public class PlayerScore : NetworkBehaviour
         }
     }
 
-    // ==========================================================
-    // RPCs PARA UNITY 6 (Ejecución forzada en el Servidor)
-    // ==========================================================
+   
 
     [Rpc(SendTo.Server)]
     private void AddScoreServerRpc(int amount)
@@ -106,7 +104,7 @@ public class PlayerScore : NetworkBehaviour
         EntregarPuntosServer();
     }
 
-    // --- MÉTODOS DEL SERVIDOR ---
+    
     public void AddScore(int amount)
     {
         if (!IsServer) return;
@@ -125,7 +123,7 @@ public class PlayerScore : NetworkBehaviour
         return cantidadAEntregar;
     }
 
-    // --- RESPUESTAS A CAMBIOS DE RED ---
+    
 
     private void AlCambiarPuntosMano(int viejo, int nuevo)
     {

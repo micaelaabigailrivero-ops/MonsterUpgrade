@@ -6,26 +6,66 @@ public class ItemPickup : NetworkBehaviour
     [SerializeField] private int itemValue = 1;
     private bool isCollected = false;
 
-  
-    public void RecolectarItem(PlayerScore playerScore)
+    private void OnEnable()
     {
-       
-        Debug.Log($"[ITEM] ¡Alguien me tocó! ¿Ya fui recolectado antes?: {isCollected}");
+        isCollected = false;
+    }
 
+   
+    private void OnTriggerEnter(Collider other)
+    {
         if (isCollected) return;
-        isCollected = true;
 
-        playerScore.SolicitarAgregarPuntos(itemValue);
+       
+        PlayerScore playerScore = other.GetComponentInParent<PlayerScore>();
 
-        if (IsServer)
+        if (playerScore != null)
         {
-            Debug.Log("[ITEM] Soy el Servidor y voy a destruirme de la red ahora mismo.");
-            GetComponent<NetworkObject>().Despawn(true);
+           
+            if (playerScore.IsOwner)
+            {
+                isCollected = true;
+
+                
+                playerScore.SolicitarAgregarPuntos(itemValue);
+
+                
+                if (IsServer)
+                {
+                    
+                    GetComponent<NetworkObject>().Despawn(true);
+                }
+                else
+                {
+                    
+                    DespawnItemServerRpc();
+
+                   
+                    OcultarItemLocal();
+                }
+            }
         }
-        else
+    }
+
+    
+    [Rpc(SendTo.Server)]
+    private void DespawnItemServerRpc()
+    {
+        if (NetworkObject != null && NetworkObject.IsSpawned)
         {
-            Debug.Log("[ITEM] Soy un Cliente, ocultando gráficos.");
-            gameObject.SetActive(false);
+            NetworkObject.Despawn(true); 
+        }
+    }
+
+    
+    private void OcultarItemLocal()
+    {
+        if (TryGetComponent<Collider>(out Collider col)) col.enabled = false;
+        if (TryGetComponent<Renderer>(out Renderer ren)) ren.enabled = false;
+
+        foreach (Transform hijo in transform)
+        {
+            hijo.gameObject.SetActive(false);
         }
     }
 }
